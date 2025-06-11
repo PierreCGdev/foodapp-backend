@@ -64,5 +64,26 @@ router.get('/recipe/:id', function(req: Request, res: Response, ) {
     });
 });
 
+router.post("/favoritesRecipes", async function(req: Request, res: Response) {
+  const favoritesId: string[] = req.body.favoritesId;
+
+  try {
+    const recipes = await Promise.all(
+      favoritesId.map(async (id) => {
+        const response = await fetch(
+          `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`
+        );
+        const data = await response.json();
+        return data.meals?.[0] || null;
+      })
+    );
+
+    res.json({ result: true, recipes });
+  } catch (error) { 
+    console.error(error);
+    res.status(500).json({ result: false, error: "Server error" });
+  }
+});
+
 
 module.exports = router;

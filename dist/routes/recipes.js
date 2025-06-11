@@ -60,4 +60,24 @@ router.get('/recipe/:id', function (req, res) {
         res.status(500).json({ result: false, error });
     });
 });
+router.post("/favoritesRecipes", async function (req, res) {
+    const favoritesId = req.body.favoritesId;
+    // if (!favoritesId || favoritesId.length === 0) {
+    //   return res
+    //     .status(400)
+    //     .json({ result: false, error: "Missing or empty fields" });
+    // }
+    try {
+        const recipes = await Promise.all(favoritesId.map(async (id) => {
+            const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
+            const data = await response.json();
+            return data.meals?.[0] || null;
+        }));
+        res.json({ result: true, recipes });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ result: false, error: "Server error" });
+    }
+});
 module.exports = router;
